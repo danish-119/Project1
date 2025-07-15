@@ -4,8 +4,8 @@ import PocketBase from 'pocketbase';
 export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const rawCookie = req.headers.get('cookie') || '';
-  const pb = new PocketBase(process.env.POCKETBASE_URL);
 
+  const pb = new PocketBase(process.env.POCKETBASE_URL);
   pb.authStore.loadFromCookie(rawCookie);
 
   try {
@@ -20,6 +20,8 @@ export async function middleware(req: NextRequest) {
   const protectedRoutes = ['/account', '/upload', '/dashboard'];
   const isProtected = protectedRoutes.some((path) => url.pathname.startsWith(path));
 
+  console.log('IS PROTECTED:', isProtected);
+  console.log('USER AUTH VALID:', pb.authStore.isValid);
   if (isProtected && !pb.authStore.isValid) {
     url.pathname = '/login';
     return NextResponse.redirect(url);
