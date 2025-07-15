@@ -4,22 +4,16 @@ import { useEffect, useState } from 'react';
 import pb from '@/lib/pocketbase';
 import Head from 'next/head';
 import { RecordModel } from 'pocketbase';
+import { useAuth } from '../../components/context/AuthContext';
 
 export default function AccountPage() {
-  const [user, setUser] = useState<RecordModel | null >(pb.authStore.model);
   const [contributorId, setContributorId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync user state with authStore
-  useEffect(() => {
-    const unsub = pb.authStore.onChange(() => {
-      setUser(pb.authStore.model);
-    });
-    return () => unsub();
-  }, []);
+  const { user, fetchUserData } = useAuth();
 
   // Fetch contributor record on user change
   useEffect(() => {
@@ -56,6 +50,7 @@ export default function AccountPage() {
       if (contributorId) {
         await pb.collection('contributors').update(contributorId, data);
         setMessage('Profile updated successfully!');
+        fetchUserData(); // Refresh user context
       } else {
         const created = await pb.collection('contributors').create(data);
         setContributorId(created.id);

@@ -5,13 +5,15 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const rawCookie = req.headers.get('cookie') || '';
 
-  console.log('MIDDLEWARE COOKIE:', rawCookie);
+  // console.log('MIDDLEWARE COOKIE:', rawCookie);
 
   const pb = new PocketBase(process.env.POCKETBASE_URL);
   pb.authStore.loadFromCookie(rawCookie);
 
   try {
-    await pb.collection('users').authRefresh();
+    if (pb.authStore.isValid) {
+      await pb.collection('users').authRefresh();
+    }
   } catch (e) {
     console.error('AUTH REFRESH ERROR:', e);
     pb.authStore.clear();
@@ -20,6 +22,8 @@ export async function middleware(req: NextRequest) {
   const protectedRoutes = ['/account', '/upload', '/dashboard'];
   const isProtected = protectedRoutes.some((path) => url.pathname.startsWith(path));
 
+  console.log('IS PROTECTED:', isProtected);
+  console.log('USER AUTH VALID:', pb.authStore.isValid);
   if (isProtected && !pb.authStore.isValid) {
     url.pathname = '/login';
     return NextResponse.redirect(url);

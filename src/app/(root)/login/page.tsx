@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import pb from '@/lib/pocketbase';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useAuth } from './../../components/context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,26 +14,17 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const { login } = useAuth();
+
+  const handleLogin = async (email: string, password: string) => {
     setError('');
     setIsLoading(true);
 
-    try {
-      await pb.collection('users').authWithPassword(email, password);
-      document.cookie = pb.authStore.exportToCookie({
-        httpOnly: false,
-        secure: false,
-        sameSite: 'Lax',
-      });
-
-      router.push('/account');
-    } catch (err: any) {
-      setError(err.message || 'Failed to authenticate. Please check your credentials.');
-      console.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
-    }
+    let error = await login(email, password)
+    if (error) {
+      setError(error);
+    } 
+    setIsLoading(false);
   };
 
   const LoadingSpinner = () => (
@@ -94,7 +86,10 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-5">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin(email, password)
+            }} className="space-y-5">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email address
