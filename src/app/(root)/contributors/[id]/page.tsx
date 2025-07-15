@@ -36,18 +36,18 @@ export default function ContributorProfilePage() {
 
     const fetchData = async () => {
       try {
-        // Fetch contributor with expanded user relation
+       
         const contributorRecord = await pb.collection('contributors').getOne(id as string, {
           expand: 'user',
         });
 
-       
+
         const userId = contributorRecord.expand?.user?.id;
         const currentUserId = pb.authStore.model?.id;
 
-         console.log('Contributor Record:', contributorRecord);
-         console.log('User ID:', userId);
-         console.log('Current User ID:', currentUserId);
+        console.log('Contributor Record:', contributorRecord);
+        console.log('User ID:', userId);
+        console.log('Current User ID:', currentUserId);
 
         setContributor({
           id: contributorRecord.id,
@@ -56,13 +56,11 @@ export default function ContributorProfilePage() {
           user: userId,
         });
 
-        // Redirect if user is viewing their own profile
         if (currentUserId === userId) {
           setIsCurrentUser(true);
           return;
         }
 
-        // Fetch assets where contributor=userId AND is_premium=false
         const result = await pb.collection('assets').getList(1, 50, {
           filter: `contributor="${userId}" && is_premium=false`,
           sort: '-created',
