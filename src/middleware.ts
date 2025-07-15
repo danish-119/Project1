@@ -5,8 +5,6 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const rawCookie = req.headers.get('cookie') || '';
 
-  // console.log('MIDDLEWARE COOKIE:', rawCookie);
-
   const pb = new PocketBase(process.env.POCKETBASE_URL);
   pb.authStore.loadFromCookie(rawCookie);
 

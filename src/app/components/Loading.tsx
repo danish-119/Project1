@@ -1,3 +1,6 @@
+// Loading: A full-screen animated loading screen used during data fetching or navigation delays.
+// Includes a spinning icon, animated text dots, and a progress bar to enhance user experience.
+
 import React from 'react'
 
 const Loading = () => {

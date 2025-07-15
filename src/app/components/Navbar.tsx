@@ -1,3 +1,8 @@
+// NavBar: Responsive navigation bar with conditional links based on authentication.
+// Displays "Gallery", "Dashboard", "Upload", and "Account" links for logged-in users,
+// and "Login"/"Register" buttons for guests. Shows user avatar or initials from userData.
+// Includes mobile toggle menu with the same functionality. Uses PocketBase auth state from context.
+
 'use client';
 
 import { useEffect, useState } from 'react';

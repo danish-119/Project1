@@ -1,3 +1,6 @@
+// Layout: Wraps each page with a Navbar and conditionally shows a loading screen
+// while authentication state is being initialized from the AuthContext.
+
 'use client';
 
 import Navbar from "../components/Navbar"

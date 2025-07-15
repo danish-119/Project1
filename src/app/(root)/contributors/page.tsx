@@ -1,3 +1,6 @@
+// AllContributorsPage: Displays a grid of all contributor profiles with links to their public pages.
+// Fetches data from PocketBase on load, shows a loader or empty state, and uses Tailwind for layout.
+
 'use client';
 
 import { useEffect, useState } from 'react';

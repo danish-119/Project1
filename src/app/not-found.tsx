@@ -1,3 +1,7 @@
+// NotFoundPage: Custom 404 error page for undefined routes.
+// Displays a friendly message, illustration, and options to return home or go to the dashboard (if logged in).
+// Uses PocketBase to check if the user is authenticated.
+
 import Head from 'next/head';
 import Link from 'next/link';
 import pb from '../lib/pocketbase';

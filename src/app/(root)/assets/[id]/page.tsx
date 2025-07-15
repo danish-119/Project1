@@ -1,3 +1,9 @@
+// AssetDetailPage: Displays full details of a single visual asset.
+// - Fetches asset record by dynamic `id` route param and expands contributor + attributes.
+// - Shows asset image, title, description, upload date, and tags.
+// - Includes contributor card with display name and bio, linking to their public profile.
+// - Handles loading states, error fallback, and click-to-navigate contributor logic.
+
 'use client';
 
 import { useEffect, useState } from 'react';

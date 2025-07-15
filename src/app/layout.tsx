@@ -1,3 +1,7 @@
+// RootLayout: Defines the global layout for the Next.js app.
+// Applies Geist fonts, global CSS, and wraps the entire app in the AuthProvider for authentication state.
+// Also sets default metadata like title and description.
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";

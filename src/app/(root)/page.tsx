@@ -1,3 +1,9 @@
+// LandingPage: Public-facing homepage of the Visual Asset Platform.
+// - Displays a hero section with call-to-action buttons based on login state.
+// - Highlights core features like uploading, discovery, and security.
+// - Authenticated users see dashboard/upload links; unauthenticated users are prompted to register or explore the gallery.
+// - Includes a CTA section and a responsive footer with navigation links.
+
 'use client';
 
 import Head from 'next/head';

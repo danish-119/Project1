@@ -1,9 +1,14 @@
+// AccountPage: Contributor account management page for the Visual Asset Platform.
+// - Fetches or creates a contributor profile linked to the authenticated user.
+// - Allows updating display name and bio.
+// - Displays success/error feedback and handles loading state.
+// - Uses AuthContext to access and refresh user identity data.
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import pb from '@/lib/pocketbase';
 import Head from 'next/head';
-import { RecordModel } from 'pocketbase';
 import { useAuth } from '../../components/context/AuthContext';
 
 export default function AccountPage() {

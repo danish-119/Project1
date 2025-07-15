@@ -1,3 +1,6 @@
+// CheckEmailPage: Informs newly‑registered users that a verification email was sent.
+// Shows instructions, a retry link, and basic styling for a friendly confirmation screen.
+
 import Head from 'next/head';
 import Link from 'next/link';
 

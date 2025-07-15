@@ -1,3 +1,9 @@
+// RegisterPage: A client-side registration form for creating a new user using PocketBase.
+// The form collects email, password, and password confirmation.
+// It validates input (password length and match), clears field-specific errors on change,
+// submits data to PocketBase, handles server-side validation errors (e.g., duplicate email),
+// and redirects to /check-email on success. A loading spinner is shown during submission.
+
 'use client';
 
 import { useState } from 'react';

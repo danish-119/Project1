@@ -1,8 +1,12 @@
-// context/AuthContext.tsx
+// AuthContext: Provides global authentication state and methods using PocketBase.
+// Handles login, logout, user persistence via cookies, and user data fetching from the "contributors" collection.
+// Exposes `user`, `userData`, `isAuthLoading`, and auth methods via React context.
+// Used by wrapping the app with `AuthProvider` and accessing with `useAuth()` in components.
+
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import pb from '@/lib/pocketbase'; // or wherever your PocketBase instance is
+import pb from '@/lib/pocketbase';
 import type { RecordModel } from 'pocketbase';
 import { useRouter } from 'next/navigation';
 
@@ -40,29 +44,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const fetchUser = async () => {
         if (pb.authStore.isValid) {
             setUser(pb.authStore.model);
-        } else {    
+        } else {
             setUser(null);
         }
         setIsAuthLoading(false);
-    }
-    
+    };
 
     const fetchUserData = async () => {
-    try {
-      if (user) {
-        const contributor = await pb
-          .collection('contributors')
-          .getFirstListItem(`user = "${user.id}"`);
-        setUserData({
-          email: user.email,
-          displayName: contributor.display_name,
-          avatar: contributor.avatar || null,
-        });
-      }
-    } catch (err) {
-      console.error('Failed to fetch user data', err);
-    }
-  };
+        try {
+            if (user) {
+                const contributor = await pb
+                    .collection('contributors')
+                    .getFirstListItem(`user = "${user.id}"`);
+                setUserData({
+                    email: user.email,
+                    displayName: contributor.display_name,
+                    avatar: contributor.avatar || null,
+                });
+            }
+        } catch (err: any) {
+            if (err.status === 404) {
+                console.warn('No contributor profile found for user:', user?.id);
+            } else {
+                console.error('Failed to fetch user data:', err);
+            }
+            setUserData(null);
+        }
+    };
 
     const login = async (email: string, password: string) => {
         try {

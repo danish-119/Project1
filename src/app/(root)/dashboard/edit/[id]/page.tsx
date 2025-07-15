@@ -1,3 +1,10 @@
+// EditAssetPage: Allows authenticated contributors to edit metadata of an existing uploaded asset.
+// - Redirects to /login if unauthenticated.
+// - Fetches asset details and all available attributes on mount.
+// - Supports editing title, description, premium status, and assigned attributes.
+// - Displays current asset file (non-editable) with guidance to re-upload for file changes.
+// - Provides form validation, success/error feedback, and automatic redirection on update.
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -5,6 +12,7 @@ import { useRouter, useParams } from 'next/navigation';
 import pb from '@/lib/pocketbase';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useAuth } from '../../../../components/context/AuthContext';
 
 type Attribute = {
   id: string;
@@ -26,6 +34,7 @@ type Asset = {
 
 export default function EditAssetPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const { id } = useParams();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [attributes, setAttributes] = useState<Attribute[]>([]);
@@ -40,7 +49,7 @@ export default function EditAssetPage() {
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!pb.authStore.isValid) {
+    if (!user) {
       router.push('/login');
       return;
     }
@@ -51,7 +60,7 @@ export default function EditAssetPage() {
         const assetData = await pb.collection('assets').getOne(id as string, {
           expand: 'asset_attributes'
         });
-        setAsset(assetData as Asset);
+        setAsset(assetData as unknown as Asset);
         setTitle(assetData.title);
         setDescription(assetData.description);
         setIsPremium(assetData.is_premium);
@@ -59,7 +68,12 @@ export default function EditAssetPage() {
 
         // Fetch all available attributes
         const attrData = await pb.collection('attributes').getFullList();
-        setAttributes(attrData as Attribute[]);
+        setAttributes(
+          attrData.map((attr: any) => ({
+            id: attr.id,
+            name: attr.name
+          }))
+        );
       } catch (err) {
         console.error('Failed to fetch data', err);
         setMessage({ text: 'Failed to load asset data', type: 'error' });
@@ -69,7 +83,7 @@ export default function EditAssetPage() {
     };
 
     fetchData();
-  }, [id, router]);
+  }, [id, router, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

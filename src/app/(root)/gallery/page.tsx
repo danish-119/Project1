@@ -1,3 +1,10 @@
+// GalleryPage: Publicly accessible gallery to browse non-premium visual assets.
+// - Fetches and displays assets with `is_premium = false` from PocketBase.
+// - Supports search filtering by title or description.
+// - Shows thumbnail previews with hover description overlay.
+// - Handles loading and empty states gracefully.
+// - Clicking an asset navigates to its detail page (/assets/[id]).
+
 'use client';
 
 import { useEffect, useState } from 'react';

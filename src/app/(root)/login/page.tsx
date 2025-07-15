@@ -1,14 +1,16 @@
+// LoginPage: A client-side login form using PocketBase and context-based auth.
+// It captures user email and password, calls the `login` function from AuthContext,
+// handles loading and error states, and shows a spinner during authentication.
+// On successful login, navigation is handled within the context or via router.
+
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import pb from '@/lib/pocketbase';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from './../../components/context/AuthContext';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -119,27 +121,6 @@ export default function LoginPage() {
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm focus:outline-none"
                 />
               </div>
-
-              {/* <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                    Remember me
-                  </label>
-                </div>
-
-                <div className="text-sm">
-                  <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                    Forgot password?
-                  </a>
-                </div>
-              </div> */}
-
               <div className="pt-2">
                 <button
                   type="submit"

@@ -1,3 +1,11 @@
+// DashboardPage: Authenticated user's personal dashboard to manage uploaded assets.
+// - Redirects to /login if not authenticated.
+// - Fetches all assets uploaded by the currently logged-in contributor.
+// - Displays each asset with preview, title, date, and premium badge (if applicable).
+// - Allows editing or deleting individual assets.
+// - Includes confirmation modal before deletion.
+// - Responsive grid layout with graceful loading and empty states.
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -5,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import pb from '@/lib/pocketbase';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useAuth } from '../../components/context/AuthContext';
 
 type Asset = {
   id: string;
@@ -18,25 +27,27 @@ type Asset = {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!pb.authStore.isValid) {
+    if (!user) {
       router.push('/login');
       return;
     }
 
     const fetchAssets = async () => {
       try {
-        const result = await pb.collection('assets').getList(1, 50, {
-          filter: `contributor.id = "${pb.authStore.model?.id}"`,
+        setLoading(true);
+        const result = await pb.collection('assets').getFullList({
+          filter: `contributor.id = "${user.id}"`,
           sort: '-created',
         });
 
-        setAssets(result.items.map((item) => ({
+        setAssets(result.map((item) => ({
           id: item.id,
           title: item.title,
           description: item.description || '',
@@ -44,7 +55,7 @@ export default function DashboardPage() {
           file: item.file,
           collectionId: item.collectionId,
           created: item.created,
-          })));
+        })));
       } catch (err) {
         console.error('Failed to fetch assets', err);
       } finally {
@@ -53,7 +64,8 @@ export default function DashboardPage() {
     };
 
     fetchAssets();
-  }, [router]);
+  }, [user, router]);
+
 
   const handleDelete = async (id: string) => {
     try {
@@ -80,8 +92,8 @@ export default function DashboardPage() {
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl md:text-3xl font-bold">My Dashboard</h1>
-              <Link 
-                href="/upload" 
+              <Link
+                href="/upload"
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
               >
                 Upload New

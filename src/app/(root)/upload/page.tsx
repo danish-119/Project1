@@ -1,12 +1,23 @@
+// UploadPage: Authenticated contributor interface to upload visual assets.
+// - Uses AuthContext to access the authenticated user ID.
+// - Fetches available attributes from PocketBase for tagging.
+// - Handles file uploads with preview support (images only).
+// - Includes fields for title, description, premium toggle, and attribute tagging.
+// - Uses PocketBase to store asset metadata and file.
+// - Displays status messages and redirects to dashboard upon success.
+// - Validates login and prevents multiple submissions during upload.
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import pb from '@/lib/pocketbase';
 import Head from 'next/head';
+import { useAuth } from '../../components/context/AuthContext';
 
 export default function UploadPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPremium, setIsPremium] = useState(false);
@@ -58,7 +69,7 @@ export default function UploadPage() {
     const submitButton = formRef.current?.querySelector('button[type="submit"]');
     submitButton?.setAttribute('disabled', 'true');
 
-    const contributorId = pb.authStore.model?.id;
+    const contributorId = user?.id;
 
     if (!contributorId) {
       setMessage({ text: 'You must be logged in to upload.', type: 'error' });
@@ -90,9 +101,9 @@ export default function UploadPage() {
       router.push('/dashboard');
     } catch (err: any) {
       console.error('UPLOAD ERROR:', err);
-      setMessage({ 
-        text: err.response?.data?.message || err.message || 'Upload failed.', 
-        type: 'error' 
+      setMessage({
+        text: err.response?.data?.message || err.message || 'Upload failed.',
+        type: 'error'
       });
     } finally {
       cleanup();
@@ -169,9 +180,9 @@ export default function UploadPage() {
                   <div className="space-y-1 text-center">
                     {previewUrl ? (
                       <div className="relative group">
-                        <img 
-                          src={previewUrl} 
-                          alt="Preview" 
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
                           className="mx-auto max-h-60 rounded-lg object-contain shadow-sm"
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg flex items-center justify-center">
