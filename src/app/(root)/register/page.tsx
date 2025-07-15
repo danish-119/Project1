@@ -60,7 +60,8 @@ export default function RegisterPage() {
                 password,
                 passwordConfirm,
             });
-
+            await pb.collection('users').requestVerification(email);
+            
             router.push('/check-email');
         } catch (err: any) {
             console.error('Registration error:', err);
