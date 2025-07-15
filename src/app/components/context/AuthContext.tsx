@@ -75,14 +75,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = async (email: string, password: string) => {
         try {
             await pb.collection('users').authWithPassword(email, password);
+
             document.cookie = pb.authStore.exportToCookie({
                 httpOnly: false,
-                secure: false,
+                secure: true,
                 sameSite: 'Lax',
+                path: '/',          // Required for Vercel middleware to access
             });
 
-            fetchUser();
-            fetchUserData();
+            await fetchUser();
+            await fetchUserData();
+
+            router.push('/dashboard');
+
+
 
             console.log('User logged in:', pb.authStore.model);
             router.push('/dashboard');
