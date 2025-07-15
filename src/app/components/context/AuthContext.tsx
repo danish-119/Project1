@@ -72,21 +72,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    // Updated login function in AuthContext
     const login = async (email: string, password: string) => {
         try {
-            await pb.collection('users').authWithPassword(email, password);
-            document.cookie = pb.authStore.exportToCookie({
+            // Clear any existing auth state
+            pb.authStore.clear();
+
+            // Perform authentication
+            const authData = await pb.collection('users').authWithPassword(email, password);
+
+            // Set cookie with proper domain and flags
+            const cookie = pb.authStore.exportToCookie({
                 httpOnly: false,
-                secure: false,
+                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'Lax',
+                path: '/',
+                domain: process.env.NODE_ENV === 'production'
+                    ? `.${window.location.hostname}`
+                    : undefined
             });
 
-            fetchUser();
-            fetchUserData();
+            document.cookie = cookie;
 
-            console.log('User logged in:', pb.authStore.model);
-            router.push('/dashboard');
-            console.log('Redirecting to dashboard');
+            // Add a cache-buster parameter to the redirect URL
+            const redirectUrl = `/dashboard?auth=${Date.now()}`;
+
+            // Force a hard redirect to ensure middleware runs with fresh cookies
+            window.location.href = redirectUrl;
+
         } catch (err: any) {
             console.error('Login error:', err);
             return err.message || 'Login failed';

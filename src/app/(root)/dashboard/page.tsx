@@ -1,11 +1,3 @@
-// DashboardPage: Authenticated user's personal dashboard to manage uploaded assets.
-// - Redirects to /login if not authenticated.
-// - Fetches all assets uploaded by the currently logged-in contributor.
-// - Displays each asset with preview, title, date, and premium badge (if applicable).
-// - Allows editing or deleting individual assets.
-// - Includes confirmation modal before deletion.
-// - Responsive grid layout with graceful loading and empty states.
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -27,45 +19,48 @@ type Asset = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isAuthLoading } = useAuth();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) {
-      router.push('/login');
+    // Redirect if not authenticated (after auth check completes)
+    if (!isAuthLoading && !user) {
+      router.push('/login?redirect=/dashboard');
       return;
     }
 
-    const fetchAssets = async () => {
-      try {
-        setLoading(true);
-        const result = await pb.collection('assets').getFullList({
-          filter: `contributor.id = "${user.id}"`,
-          sort: '-created',
-        });
+    // Only fetch assets if authenticated
+    if (user) {
+      const fetchAssets = async () => {
+        try {
+          setLoading(true);
+          const result = await pb.collection('assets').getFullList({
+            filter: `contributor.id = "${user.id}"`,
+            sort: '-created',
+          });
 
-        setAssets(result.map((item) => ({
-          id: item.id,
-          title: item.title,
-          description: item.description || '',
-          is_premium: item.is_premium,
-          file: item.file,
-          collectionId: item.collectionId,
-          created: item.created,
-        })));
-      } catch (err) {
-        console.error('Failed to fetch assets', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+          setAssets(result.map((item) => ({
+            id: item.id,
+            title: item.title,
+            description: item.description || '',
+            is_premium: item.is_premium,
+            file: item.file,
+            collectionId: item.collectionId,
+            created: item.created,
+          })));
+        } catch (err) {
+          console.error('Failed to fetch assets', err);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchAssets();
-  }, [user, router]);
-
+      fetchAssets();
+    }
+  }, [user, isAuthLoading, router]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -78,6 +73,15 @@ export default function DashboardPage() {
       setAssetToDelete(null);
     }
   };
+
+  // Show loading state while checking auth
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <>

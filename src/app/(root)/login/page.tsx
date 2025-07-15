@@ -1,13 +1,9 @@
-// LoginPage: A client-side login form using PocketBase and context-based auth.
-// It captures user email and password, calls the `login` function from AuthContext,
-// handles loading and error states, and shows a spinner during authentication.
-// On successful login, navigation is handled within the context or via router.
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from './../../components/context/AuthContext';
 
 export default function LoginPage() {
@@ -15,18 +11,33 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/dashboard';
+  const { login, user } = useAuth();
 
-  const { login } = useAuth();
+  useEffect(() => {
+    if (user) {
+      // Force full page reload to ensure middleware sees the auth state
+      window.location.href = `${redirect}?auth=${Date.now()}`;
+    }
+  }, [user, redirect]);
 
-  const handleLogin = async (email: string, password: string) => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    let error = await login(email, password)
-    if (error) {
-      setError(error);
-    } 
-    setIsLoading(false);
+    try {
+      const error = await login(email, password);
+      if (error) {
+        setError(error);
+      }
+      // The redirect will be handled by the useEffect when user state updates
+    } catch (err) {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const LoadingSpinner = () => (
@@ -88,10 +99,7 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleLogin(email, password)
-            }} className="space-y-5">
+            <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email address
@@ -135,7 +143,7 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+                <Link href={`/register${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="font-medium text-indigo-600 hover:text-indigo-500">
                   Sign up
                 </Link>
               </p>
